@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>设备信息检测</title>
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 30px; color: #222; }
+    h2 { color: #2c7; }
+    pre { background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>✅ 您的设备信息如下：</h2>
+  <pre id="output">正在加载中...</pre>
+
+  <script>
+    async function fetchIP(url) {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.ip || "未知";
+      } catch {
+        return "不可用";
+      }
+    }
+
+    async function fetchFingerprint() {
+      try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        return result.visitorId;
+      } catch {
+        return "获取失败";
+      }
+    }
+
+    function getDeviceInfo() {
+      return {
+        ua: navigator.userAgent,
+        platform: navigator.platform,
+        resolution: `${screen.width} x ${screen.height}`
+      };
+    }
+
+    async function showInfo() {
+      const ipv4 = await fetchIP("https://api.ipify.org?format=json");
+      const ipv6 = await fetchIP("https://api64.ipify.org?format=json");
+      const fingerprint = await fetchFingerprint();
+      const info = getDeviceInfo();
+
+      const output = `
+✅ IPv4 地址：${ipv4}
+✅ IPv6 地址：${ipv6}
+✅ 浏览器 UA：${info.ua}
+✅ 操作系统平台：${info.platform}
+✅ 屏幕分辨率：${info.resolution}
+✅ 模拟设备号（指纹）：${fingerprint}
+      `;
+      document.getElementById("output").textContent = output;
+    }
+
+    showInfo();
+  </script>
+</body>
+</html>
