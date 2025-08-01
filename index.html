@@ -1,70 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Informações do Dispositivo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico do Dispositivo</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
       margin: 0;
       padding: 40px;
     }
-    .container {
-      background: #fff;
-      max-width: 700px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    h1 {
+      color: #2a7ae2;
+      text-align: center;
     }
-    h2 {
-      color: #28a745;
+    .card {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px 30px;
+      margin: 20px auto;
+      max-width: 800px;
     }
-    .info {
-      margin: 15px 0;
-      font-size: 16px;
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #444;
+      border-bottom: 2px solid #2a7ae2;
+      padding-bottom: 5px;
     }
-    .info span {
-      font-weight: bold;
-      color: #333;
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
     }
-    .fail {
-      color: #d9534f;
+    .info-row span {
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>✅ As informações do seu dispositivo são:</h2>
-    <div class="info"><span>Endereço IPv4:</span> <span id="ipv4">Carregando...</span></div>
-    <div class="info"><span>Endereço IPv6:</span> <span id="ipv6">Carregando...</span></div>
-    <div class="info"><span>Navegador:</span> <span id="ua"></span></div>
-    <div class="info"><span>Sistema Operacional:</span> <span id="os"></span></div>
-    <div class="info"><span>Resolução da Tela:</span> <span id="res"></span></div>
-    <div class="info"><span>Fuso Horário:</span> <span id="tz"></span></div>
-    <div class="info"><span>Idioma do Navegador:</span> <span id="lang"></span></div>
-    <div class="info"><span>ID do Dispositivo:</span> <span class="fail">Falha ao obter</span></div>
+  <h1>Diagnóstico do Dispositivo</h1>
+
+  <div class="card">
+    <div class="section-title">🌐 Rede</div>
+    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4"></span></div>
+    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6"></span></div>
+    <div class="info-row"><span>DNS:</span><span id="dns"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">💻 Software</div>
+    <div class="info-row"><span>Dispositivo:</span><span id="device"></span></div>
+    <div class="info-row"><span>Sistema Operacional:</span><span id="os"></span></div>
+    <div class="info-row"><span>Navegador:</span><span id="browser"></span></div>
+    <div class="info-row"><span>Motor:</span><span id="engine"></span></div>
+    <div class="info-row"><span>User Agent:</span><span id="useragent"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📱 Especificação do Dispositivo</div>
+    <div class="info-row"><span>GPU:</span><span id="gpu"></span></div>
+    <div class="info-row"><span>Memória RAM:</span><span id="ram"></span></div>
+    <div class="info-row"><span>Resolução da Tela:</span><span id="resolution"></span></div>
+    <div class="info-row"><span>Proporção:</span><span id="aspect"></span></div>
+    <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
   </div>
 
   <script>
-    document.getElementById('ua').textContent = navigator.userAgent;
-    document.getElementById('os').textContent = navigator.platform;
-    document.getElementById('res').textContent = `${screen.width} x ${screen.height}`;
-    document.getElementById('tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    document.getElementById('lang').textContent = navigator.language;
+    document.getElementById("useragent").textContent = navigator.userAgent;
+    document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
+    document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
+    document.getElementById("os").textContent = navigator.platform;
+    document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
+    document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
+    document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
+    document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
+    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+    document.getElementById("gpu").textContent = "Detectando...";
+    document.getElementById("dns").textContent = "Detectando...";
+    document.getElementById("ipv4").textContent = "Detectando...";
+    document.getElementById("ipv6").textContent = "Detectando...";
 
-    // Obter IP externo
-    fetch("https://api64.ipify.org?format=json")
-      .then(response => response.json())
-      .then(data => document.getElementById("ipv4").textContent = data.ip)
-      .catch(() => document.getElementById("ipv4").textContent = "Falha");
+    // GPU detect
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      document.getElementById("gpu").textContent = vendor;
+    } else {
+      document.getElementById("gpu").textContent = "Não detectado";
+    }
 
-    fetch("https://api64.ipify.org?format=json&ip=6")
-      .then(response => response.json())
-      .then(data => document.getElementById("ipv6").textContent = data.ip)
-      .catch(() => document.getElementById("ipv6").textContent = "Falha");
+    // IP + DNS API (https://ipapi.co/json)
+    fetch("https://ipapi.co/json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("ipv4").textContent = data.ip;
+        document.getElementById("dns").textContent = data.org || "N/A";
+      });
   </script>
 </body>
 </html>
