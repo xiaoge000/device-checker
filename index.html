@@ -72,54 +72,62 @@
     <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
   </div>
 
-  <script>
-    // ✅ 基本信息
-    document.getElementById("useragent").textContent = navigator.userAgent;
-    document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
-    document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
-    document.getElementById("os").textContent = navigator.platform;
-    document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
-    document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
-    document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
-    document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
-    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+ <script>
+  // ✅ 设备信息
+  document.getElementById("useragent").textContent = navigator.userAgent;
+  document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
+  document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
+  document.getElementById("os").textContent = navigator.platform;
+  document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
+  document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
+  document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
+  document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
+  document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
 
-    // ✅ GPU 检测
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-        document.getElementById("gpu").textContent = vendor || "Detectado";
-      } else {
-        document.getElementById("gpu").textContent = "Não detectado";
-      }
-    } catch (e) {
-      document.getElementById("gpu").textContent = "Erro ao detectar";
+  // ✅ GPU
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      document.getElementById("gpu").textContent = vendor || "Detectado";
+    } else {
+      document.getElementById("gpu").textContent = "Não detectado";
     }
+  } catch (e) {
+    document.getElementById("gpu").textContent = "Erro ao detectar";
+  }
 
-    // ✅ IP 和 DNS 获取
-    fetch("https://ipapi.co/json")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("ipv4").textContent = data.ip || "N/A";
-        document.getElementById("dns").textContent = data.org || "N/A";
-      })
-      .catch(() => {
-        document.getElementById("ipv4").textContent = "Erro";
-        document.getElementById("dns").textContent = "Erro";
-      });
+  // ✅ 获取 IPv4
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("ipv4").textContent = data.ip || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("ipv4").textContent = "Erro";
+    });
 
-    // ✅ 尝试获取 IPv6（需公网支持）
-    fetch("https://api64.ipify.org?format=json")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("ipv6").textContent = data.ip || "N/A";
-      })
-      .catch(() => {
-        document.getElementById("ipv6").textContent = "Não disponível";
-      });
-  </script>
+  // ✅ 获取 IPv6
+  fetch("https://api64.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("ipv6").textContent = data.ip || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("ipv6").textContent = "Não disponível";
+    });
+
+  // ✅ DNS 组织名称（ISP）
+  fetch("https://ipapi.co/json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("dns").textContent = data.org || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("dns").textContent = "Erro";
+    });
+</script>
 </body>
 </html>
