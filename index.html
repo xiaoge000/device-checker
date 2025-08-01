@@ -1,67 +1,70 @@
-
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>设备信息检测</title>
-  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informações do Dispositivo</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 30px; color: #222; }
-    h2 { color: #2c7; }
-    pre { background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; white-space: pre-wrap; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 40px;
+    }
+    .container {
+      background: #fff;
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #28a745;
+    }
+    .info {
+      margin: 15px 0;
+      font-size: 16px;
+    }
+    .info span {
+      font-weight: bold;
+      color: #333;
+    }
+    .fail {
+      color: #d9534f;
+    }
   </style>
 </head>
 <body>
-  <h2>✅ 您的设备信息如下：</h2>
-  <pre id="output">正在加载中...</pre>
+  <div class="container">
+    <h2>✅ As informações do seu dispositivo são:</h2>
+    <div class="info"><span>Endereço IPv4:</span> <span id="ipv4">Carregando...</span></div>
+    <div class="info"><span>Endereço IPv6:</span> <span id="ipv6">Carregando...</span></div>
+    <div class="info"><span>Navegador:</span> <span id="ua"></span></div>
+    <div class="info"><span>Sistema Operacional:</span> <span id="os"></span></div>
+    <div class="info"><span>Resolução da Tela:</span> <span id="res"></span></div>
+    <div class="info"><span>Fuso Horário:</span> <span id="tz"></span></div>
+    <div class="info"><span>Idioma do Navegador:</span> <span id="lang"></span></div>
+    <div class="info"><span>ID do Dispositivo:</span> <span class="fail">Falha ao obter</span></div>
+  </div>
 
   <script>
-    async function fetchIP(url) {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        return data.ip || "未知";
-      } catch {
-        return "不可用";
-      }
-    }
+    document.getElementById('ua').textContent = navigator.userAgent;
+    document.getElementById('os').textContent = navigator.platform;
+    document.getElementById('res').textContent = `${screen.width} x ${screen.height}`;
+    document.getElementById('tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('lang').textContent = navigator.language;
 
-    async function fetchFingerprint() {
-      try {
-        const fp = await FingerprintJS.load();
-        const result = await fp.get();
-        return result.visitorId;
-      } catch {
-        return "获取失败";
-      }
-    }
+    // Obter IP externo
+    fetch("https://api64.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => document.getElementById("ipv4").textContent = data.ip)
+      .catch(() => document.getElementById("ipv4").textContent = "Falha");
 
-    function getDeviceInfo() {
-      return {
-        ua: navigator.userAgent,
-        platform: navigator.platform,
-        resolution: `${screen.width} x ${screen.height}`
-      };
-    }
-
-    async function showInfo() {
-      const ipv4 = await fetchIP("https://api.ipify.org?format=json");
-      const ipv6 = await fetchIP("https://api64.ipify.org?format=json");
-      const fingerprint = await fetchFingerprint();
-      const info = getDeviceInfo();
-
-      const output = `
-✅ IPv4 地址：${ipv4}
-✅ IPv6 地址：${ipv6}
-✅ 浏览器 UA：${info.ua}
-✅ 操作系统平台：${info.platform}
-✅ 屏幕分辨率：${info.resolution}
-✅ 模拟设备号（指纹）：${fingerprint}
-      `;
-      document.getElementById("output").textContent = output;
-    }
-
-    showInfo();
+    fetch("https://api64.ipify.org?format=json&ip=6")
+      .then(response => response.json())
+      .then(data => document.getElementById("ipv6").textContent = data.ip)
+      .catch(() => document.getElementById("ipv6").textContent = "Falha");
   </script>
 </body>
 </html>
