@@ -1,126 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Detector de Dispositivo</title>
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f8;
-      margin: 0;
+      font-family: sans-serif;
+      background: #f6f6f6;
       padding: 20px;
     }
-    .box {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      padding: 20px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      background: white;
     }
-    .section-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-      color: #444;
-      border-bottom: 2px solid #007BFF;
-      padding-bottom: 5px;
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
     }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 6px 0;
-    }
-    .info-row span:first-child {
-      font-weight: bold;
+    th {
+      background: #f0f0f0;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <div class="section-title">🆔 Identificador & Região</div>
-    <div class="info-row"><span>Device ID:</span><span id="deviceid">Detectando...</span></div>
-    <div class="info-row"><span>Localização:</span><span id="location">Detectando...</span></div>
-    <div class="info-row"><span>Idioma do Navegador:</span><span id="language">Detectando...</span></div>
-    <div class="info-row"><span>Fuso Horário:</span><span id="timezone">Detectando...</span></div>
-  </div>
+  <h2>Identificador & Região</h2>
+  <table>
+    <tr><th>Device ID</th><td id="deviceId">Carregando...</td></tr>
+    <tr><th>Localização</th><td id="location">Carregando...</td></tr>
+    <tr><th>Idioma do Navegador</th><td id="language">Carregando...</td></tr>
+    <tr><th>Fuso Horário</th><td id="timezone">Carregando...</td></tr>
+  </table>
 
-  <div class="box">
-    <div class="section-title">🌐 Rede</div>
-    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4">Detectando...</span></div>
-    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6">Detectando...</span></div>
-    <div class="info-row"><span>DNS:</span><span id="dns">Detectando...</span></div>
-  </div>
+  <h2>Rede</h2>
+  <table>
+    <tr><th>Endereço IPv4</th><td id="ipv4">Carregando...</td></tr>
+    <tr><th>Endereço IPv6</th><td id="ipv6">Carregando...</td></tr>
+    <tr><th>DNS</th><td id="dns">Desconhecido</td></tr>
+  </table>
 
-  <div class="box">
-    <div class="section-title">💻 Software</div>
-    <div class="info-row"><span>Dispositivo:</span><span id="device">Detectando...</span></div>
-    <div class="info-row"><span>Sistema Operacional:</span><span id="os">Detectando...</span></div>
-    <div class="info-row"><span>Navegador:</span><span id="browser">Detectando...</span></div>
-    <div class="info-row"><span>Motor:</span><span id="engine">Detectando...</span></div>
-    <div class="info-row"><span>User Agent:</span><span id="ua">Detectando...</span></div>
-  </div>
+  <h2>Software</h2>
+  <table>
+    <tr><th>Dispositivo</th><td id="device">Carregando...</td></tr>
+    <tr><th>Sistema Operacional</th><td id="os">Carregando...</td></tr>
+    <tr><th>Navegador</th><td id="browser">Carregando...</td></tr>
+    <tr><th>Motor</th><td id="engine">Carregando...</td></tr>
+    <tr><th>User Agent</th><td id="ua">Carregando...</td></tr>
+  </table>
 
-  <div class="box">
-    <div class="section-title">🧮 Especificação do Dispositivo</div>
-    <div class="info-row"><span>GPU:</span><span id="gpu">Detectando...</span></div>
-    <div class="info-row"><span>Memória RAM:</span><span id="ram">Detectando...</span></div>
-    <div class="info-row"><span>Resolução da Tela:</span><span id="res">Detectando...</span></div>
-    <div class="info-row"><span>Proporção:</span><span id="ratio">Detectando...</span></div>
-    <div class="info-row"><span>Orientação:</span><span id="orientation">Detectando...</span></div>
-  </div>
+  <h2>Especificações do Dispositivo</h2>
+  <table>
+    <tr><th>GPU</th><td id="gpu">Carregando...</td></tr>
+    <tr><th>Memória RAM</th><td id="ram">Carregando...</td></tr>
+    <tr><th>Resolução da Tela</th><td id="screen">Carregando...</td></tr>
+    <tr><th>Proporção</th><td id="ratio">Carregando...</td></tr>
+    <tr><th>Orientação</th><td id="orientation">Carregando...</td></tr>
+  </table>
 
   <script>
-    // 🆔 Identificador & Região
-    document.getElementById("language").textContent = navigator.language || "N/A";
-    document.getElementById("timezone").textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "N/A";
-    let deviceId = localStorage.getItem("device_id");
-    if (!deviceId) {
-      deviceId = crypto.randomUUID?.() || Math.random().toString(36).substring(2);
-      localStorage.setItem("device_id", deviceId);
-    }
-    document.getElementById("deviceid").textContent = deviceId;
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          document.getElementById("location").textContent = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
-        },
-        () => {
-          document.getElementById("location").textContent = "Negado";
+    FingerprintJS.load().then(fp => {
+      fp.get().then(result => {
+        document.getElementById("deviceId").textContent = result.visitorId;
+        document.getElementById("ua").textContent = navigator.userAgent;
+        document.getElementById("language").textContent = navigator.language;
+        document.getElementById("timezone").textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById("os").textContent = navigator.platform;
+        document.getElementById("screen").textContent = `${screen.width} x ${screen.height}`;
+        document.getElementById("ratio").textContent = (screen.width / screen.height).toFixed(2);
+        document.getElementById("orientation").textContent = screen.orientation?.type || "N/A";
+        document.getElementById("ram").textContent = navigator.deviceMemory + " GB";
+        document.getElementById("browser").textContent = navigator.appName;
+        document.getElementById("engine").textContent = navigator.product;
+
+        // GPU
+        try {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          document.getElementById("gpu").textContent = renderer;
+        } catch (e) {
+          document.getElementById("gpu").textContent = "Desconhecido";
         }
-      );
-    } else {
-      document.getElementById("location").textContent = "Não suportado";
-    }
 
-    // 💻 Software info
-    const ua = navigator.userAgent;
-    document.getElementById("ua").textContent = ua;
-    document.getElementById("os").textContent = navigator.platform;
-    document.getElementById("browser").textContent = navigator.appName;
-    document.getElementById("engine").textContent = navigator.product;
-    document.getElementById("device").textContent = /Mobi/i.test(ua) ? "Mobile" : "Desktop";
-
-    // 🧮 Hardware info
-    document.getElementById("res").textContent = `${window.screen.width} x ${window.screen.height}`;
-    document.getElementById("ratio").textContent = window.devicePixelRatio;
-    document.getElementById("orientation").textContent = screen.orientation?.type || "N/A";
-    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
-
-    // GPU Info
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    if (gl) {
-      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-      const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      document.getElementById("gpu").textContent = renderer || vendor || "Detectado";
-    }
-
-    // 🌐 Rede信息（伪装）
-    document.getElementById("ipv4").textContent = "Detectar via IP externo";
-    document.getElementById("ipv6").textContent = "Detectar via IP externo";
-    document.getElementById("dns").textContent = "CLOUDFLARENET (possivelmente)";
+        // IP e localização
+        fetch("https://ipapi.co/json/")
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById("ipv4").textContent = data.ip || "N/A";
+            document.getElementById("location").textContent = `${data.city}, ${data.region}, ${data.country_name}`;
+          });
+      });
+    });
   </script>
 </body>
 </html>
