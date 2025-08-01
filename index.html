@@ -1,100 +1,133 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Detector de Dispositivo</title>
-  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico do Dispositivo</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f6f6f6;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 40px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 30px;
-      background: white;
+    h1 {
+      color: #2a7ae2;
+      text-align: center;
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px 12px;
-      text-align: left;
+    .card {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px 30px;
+      margin: 20px auto;
+      max-width: 800px;
     }
-    th {
-      background: #f0f0f0;
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #444;
+      border-bottom: 2px solid #2a7ae2;
+      padding-bottom: 5px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+    }
+    .info-row span {
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
-  <h2>Identificador & Região</h2>
-  <table>
-    <tr><th>Device ID</th><td id="deviceId">Carregando...</td></tr>
-    <tr><th>Localização</th><td id="location">Carregando...</td></tr>
-    <tr><th>Idioma do Navegador</th><td id="language">Carregando...</td></tr>
-    <tr><th>Fuso Horário</th><td id="timezone">Carregando...</td></tr>
-  </table>
+  <h1>Diagnóstico do Dispositivo</h1>
 
-  <h2>Rede</h2>
-  <table>
-    <tr><th>Endereço IPv4</th><td id="ipv4">Carregando...</td></tr>
-    <tr><th>Endereço IPv6</th><td id="ipv6">Carregando...</td></tr>
-    <tr><th>DNS</th><td id="dns">Desconhecido</td></tr>
-  </table>
+  <!-- 🌐 Rede -->
+  <div class="card">
+    <div class="section-title">🌐 Rede</div>
+    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4">Detectando...</span></div>
+    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6">Detectando...</span></div>
+    <div class="info-row"><span>DNS:</span><span id="dns">Detectando...</span></div>
+  </div>
 
-  <h2>Software</h2>
-  <table>
-    <tr><th>Dispositivo</th><td id="device">Carregando...</td></tr>
-    <tr><th>Sistema Operacional</th><td id="os">Carregando...</td></tr>
-    <tr><th>Navegador</th><td id="browser">Carregando...</td></tr>
-    <tr><th>Motor</th><td id="engine">Carregando...</td></tr>
-    <tr><th>User Agent</th><td id="ua">Carregando...</td></tr>
-  </table>
+  <!-- 💻 Software -->
+  <div class="card">
+    <div class="section-title">💻 Software</div>
+    <div class="info-row"><span>Dispositivo:</span><span id="device"></span></div>
+    <div class="info-row"><span>Sistema Operacional:</span><span id="os"></span></div>
+    <div class="info-row"><span>Navegador:</span><span id="browser"></span></div>
+    <div class="info-row"><span>Motor:</span><span id="engine"></span></div>
+    <div class="info-row"><span>User Agent:</span><span id="useragent"></span></div>
+  </div>
 
-  <h2>Especificações do Dispositivo</h2>
-  <table>
-    <tr><th>GPU</th><td id="gpu">Carregando...</td></tr>
-    <tr><th>Memória RAM</th><td id="ram">Carregando...</td></tr>
-    <tr><th>Resolução da Tela</th><td id="screen">Carregando...</td></tr>
-    <tr><th>Proporção</th><td id="ratio">Carregando...</td></tr>
-    <tr><th>Orientação</th><td id="orientation">Carregando...</td></tr>
-  </table>
+  <!-- 📱 Especificação -->
+  <div class="card">
+    <div class="section-title">📱 Especificação do Dispositivo</div>
+    <div class="info-row"><span>GPU:</span><span id="gpu">Detectando...</span></div>
+    <div class="info-row"><span>Memória RAM:</span><span id="ram"></span></div>
+    <div class="info-row"><span>Resolução da Tela:</span><span id="resolution"></span></div>
+    <div class="info-row"><span>Proporção:</span><span id="aspect"></span></div>
+    <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
+  </div>
 
   <script>
-    FingerprintJS.load().then(fp => {
-      fp.get().then(result => {
-        document.getElementById("deviceId").textContent = result.visitorId;
-        document.getElementById("ua").textContent = navigator.userAgent;
-        document.getElementById("language").textContent = navigator.language;
-        document.getElementById("timezone").textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        document.getElementById("os").textContent = navigator.platform;
-        document.getElementById("screen").textContent = `${screen.width} x ${screen.height}`;
-        document.getElementById("ratio").textContent = (screen.width / screen.height).toFixed(2);
-        document.getElementById("orientation").textContent = screen.orientation?.type || "N/A";
-        document.getElementById("ram").textContent = navigator.deviceMemory + " GB";
-        document.getElementById("browser").textContent = navigator.appName;
-        document.getElementById("engine").textContent = navigator.product;
+  // ✅ 设备信息
+  document.getElementById("useragent").textContent = navigator.userAgent;
+  document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
+  document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
+  document.getElementById("os").textContent = navigator.platform;
+  document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
+  document.getElementById("resolution").textContent = ${screen.width} x ${screen.height};
+  document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
+  document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
+  document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
 
-        // GPU
-        try {
-          const canvas = document.createElement('canvas');
-          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-          document.getElementById("gpu").textContent = renderer;
-        } catch (e) {
-          document.getElementById("gpu").textContent = "Desconhecido";
-        }
+  // ✅ GPU
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      document.getElementById("gpu").textContent = vendor || "Detectado";
+    } else {
+      document.getElementById("gpu").textContent = "Não detectado";
+    }
+  } catch (e) {
+    document.getElementById("gpu").textContent = "Erro ao detectar";
+  }
 
-        // IP e localização
-        fetch("https://ipapi.co/json/")
-          .then(res => res.json())
-          .then(data => {
-            document.getElementById("ipv4").textContent = data.ip || "N/A";
-            document.getElementById("location").textContent = `${data.city}, ${data.region}, ${data.country_name}`;
-          });
-      });
+  // ✅ 获取 IPv4
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("ipv4").textContent = data.ip || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("ipv4").textContent = "Erro";
     });
-  </script>
+
+  // ✅ 获取 IPv6
+  fetch("https://api64.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("ipv6").textContent = data.ip || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("ipv6").textContent = "Não disponível";
+    });
+
+  // ✅ DNS 组织名称（ISP）
+  fetch("https://ipapi.co/json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("dns").textContent = data.org || "N/A";
+    })
+    .catch(() => {
+      document.getElementById("dns").textContent = "Erro";
+    });
+</script>
 </body>
 </html>
