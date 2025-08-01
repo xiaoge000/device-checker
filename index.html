@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Diagnóstico do Dispositivo</title>
   <style>
     body {
@@ -40,19 +40,23 @@
       font-weight: 500;
     }
   </style>
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
 </head>
 <body>
   <h1>Diagnóstico do Dispositivo</h1>
 
-  <!-- 🌐 Rede -->
   <div class="card">
-    <div class="section-title">🌐 Rede</div>
-    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4">Detectando...</span></div>
-    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6">Detectando...</span></div>
-    <div class="info-row"><span>DNS:</span><span id="dns">Detectando...</span></div>
+    <div class="section-title">🧠 FingerprintJS</div>
+    <div class="info-row"><span>ID Único do Dispositivo:</span><span id="fingerprintId">Carregando...</span></div>
   </div>
 
-  <!-- 💻 Software -->
+  <div class="card">
+    <div class="section-title">🌐 Rede</div>
+    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4">Carregando...</span></div>
+    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6">Carregando...</span></div>
+    <div class="info-row"><span>DNS/Provedor:</span><span id="dns">Carregando...</span></div>
+  </div>
+
   <div class="card">
     <div class="section-title">💻 Software</div>
     <div class="info-row"><span>Dispositivo:</span><span id="device"></span></div>
@@ -62,72 +66,54 @@
     <div class="info-row"><span>User Agent:</span><span id="useragent"></span></div>
   </div>
 
-  <!-- 📱 Especificação -->
   <div class="card">
     <div class="section-title">📱 Especificação do Dispositivo</div>
-    <div class="info-row"><span>GPU:</span><span id="gpu">Detectando...</span></div>
+    <div class="info-row"><span>GPU:</span><span id="gpu"></span></div>
     <div class="info-row"><span>Memória RAM:</span><span id="ram"></span></div>
     <div class="info-row"><span>Resolução da Tela:</span><span id="resolution"></span></div>
     <div class="info-row"><span>Proporção:</span><span id="aspect"></span></div>
     <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
   </div>
 
- <script>
-  // ✅ 设备信息
-  document.getElementById("useragent").textContent = navigator.userAgent;
-  document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
-  document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
-  document.getElementById("os").textContent = navigator.platform;
-  document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
-  document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
-  document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
-  document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
-  document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+  <script>
+    // FingerprintJS
+    FingerprintJS.load().then(fp => {
+      fp.get().then(result => {
+        document.getElementById('fingerprintId').textContent = result.visitorId;
+      });
+    });
 
-  // ✅ GPU
-  try {
+    // IP + DNS
+    fetch("https://ipapi.co/json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("ipv4").textContent = data.ip || "N/A";
+        document.getElementById("ipv6").textContent = data.ip || "N/A";
+        document.getElementById("dns").textContent = data.org || "N/A";
+      });
+
+    // 系统参数
+    document.getElementById("useragent").textContent = navigator.userAgent;
+    document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
+    document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
+    document.getElementById("os").textContent = navigator.platform;
+    document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
+    document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
+    document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
+    document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
+    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+    document.getElementById("gpu").textContent = "Detectando...";
+
+    // GPU
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     if (gl) {
       const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      document.getElementById("gpu").textContent = vendor || "Detectado";
+      const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "N/A";
+      document.getElementById("gpu").textContent = vendor;
     } else {
       document.getElementById("gpu").textContent = "Não detectado";
     }
-  } catch (e) {
-    document.getElementById("gpu").textContent = "Erro ao detectar";
-  }
-
-  // ✅ 获取 IPv4
-  fetch("https://api.ipify.org?format=json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("ipv4").textContent = data.ip || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("ipv4").textContent = "Erro";
-    });
-
-  // ✅ 获取 IPv6
-  fetch("https://api64.ipify.org?format=json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("ipv6").textContent = data.ip || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("ipv6").textContent = "Não disponível";
-    });
-
-  // ✅ DNS 组织名称（ISP）
-  fetch("https://ipapi.co/json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("dns").textContent = data.org || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("dns").textContent = "Erro";
-    });
-</script>
+  </script>
 </body>
 </html>
