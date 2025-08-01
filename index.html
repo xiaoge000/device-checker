@@ -79,7 +79,7 @@
   document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
   document.getElementById("os").textContent = navigator.platform;
   document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
-  document.getElementById("resolution").textContent = ${screen.width} x ${screen.height};
+  document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
   document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
   document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
   document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
