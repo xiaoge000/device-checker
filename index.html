@@ -2,117 +2,128 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Diagnóstico do Dispositivo</title>
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f4f4f9;
+      font-family: sans-serif;
+      background-color: #f5f5fa;
       color: #333;
-      margin: 0;
-      padding: 40px;
     }
     h1 {
-      color: #2a7ae2;
       text-align: center;
+      color: #2563eb;
     }
     .card {
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 20px 30px;
+      background: white;
+      padding: 16px;
       margin: 20px auto;
+      border-radius: 12px;
+      width: 90%;
       max-width: 800px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .section-title {
-      font-size: 20px;
-      margin-bottom: 12px;
-      color: #444;
-      border-bottom: 2px solid #2a7ae2;
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #2563eb;
       padding-bottom: 5px;
     }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 8px 0;
+    .card span.label {
+      font-weight: bold;
     }
-    .info-row span {
-      font-weight: 500;
+    .card p {
+      margin: 6px 0;
     }
   </style>
-  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
 </head>
 <body>
   <h1>Diagnóstico do Dispositivo</h1>
 
   <div class="card">
-    <div class="section-title">🧠 FingerprintJS</div>
-    <div class="info-row"><span>ID Único do Dispositivo:</span><span id="fingerprintId">Carregando...</span></div>
+    <h2>🧐 FingerprintJS</h2>
+    <p><span class="label">ID Único do Dispositivo:</span> <span id="fingerprint">Carregando...</span></p>
   </div>
 
   <div class="card">
-    <div class="section-title">🌐 Rede</div>
-    <div class="info-row"><span>Endereço IPv4:</span><span id="ipv4">Carregando...</span></div>
-    <div class="info-row"><span>Endereço IPv6:</span><span id="ipv6">Carregando...</span></div>
-    <div class="info-row"><span>DNS/Provedor:</span><span id="dns">Carregando...</span></div>
+    <h2>🌐 Rede</h2>
+    <p><span class="label">Endereço IPv4:</span> <span id="ipv4">Carregando...</span></p>
+    <p><span class="label">Endereço IPv6:</span> <span id="ipv6">Carregando...</span></p>
+    <p><span class="label">DNS/Provedor:</span> <span id="isp">Carregando...</span></p>
   </div>
 
   <div class="card">
-    <div class="section-title">💻 Software</div>
-    <div class="info-row"><span>Dispositivo:</span><span id="device"></span></div>
-    <div class="info-row"><span>Sistema Operacional:</span><span id="os"></span></div>
-    <div class="info-row"><span>Navegador:</span><span id="browser"></span></div>
-    <div class="info-row"><span>Motor:</span><span id="engine"></span></div>
-    <div class="info-row"><span>User Agent:</span><span id="useragent"></span></div>
+    <h2>🖥️ Software</h2>
+    <p><span class="label">Dispositivo:</span> <span id="device">Carregando...</span></p>
+    <p><span class="label">Sistema Operacional:</span> <span id="os">Carregando...</span></p>
+    <p><span class="label">Navegador:</span> <span id="browser">Carregando...</span></p>
+    <p><span class="label">Motor:</span> <span id="engine">Carregando...</span></p>
+    <p><span class="label">User Agent:</span> <span id="ua">Carregando...</span></p>
   </div>
 
   <div class="card">
-    <div class="section-title">📱 Especificação do Dispositivo</div>
-    <div class="info-row"><span>GPU:</span><span id="gpu"></span></div>
-    <div class="info-row"><span>Memória RAM:</span><span id="ram"></span></div>
-    <div class="info-row"><span>Resolução da Tela:</span><span id="resolution"></span></div>
-    <div class="info-row"><span>Proporção:</span><span id="aspect"></span></div>
-    <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
+    <h2>📏 Especificação do Dispositivo</h2>
+    <p><span class="label">GPU:</span> <span id="gpu">Carregando...</span></p>
+    <p><span class="label">Memória RAM:</span> <span id="ram">Carregando...</span></p>
+    <p><span class="label">Resolução da Tela:</span> <span id="res">Carregando...</span></p>
+    <p><span class="label">Proporção:</span> <span id="ratio">Carregando...</span></p>
+    <p><span class="label">Orientação:</span> <span id="orientation">Carregando...</span></p>
   </div>
 
   <script>
-    // FingerprintJS
-    FingerprintJS.load().then(fp => {
-      fp.get().then(result => {
-        document.getElementById('fingerprintId').textContent = result.visitorId;
-      });
-    });
-
-    // IP + DNS
-    fetch("https://ipapi.co/json")
+    // IP e ISP
+    fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
-        document.getElementById("ipv4").textContent = data.ip || "N/A";
-        document.getElementById("ipv6").textContent = data.ip || "N/A";
-        document.getElementById("dns").textContent = data.org || "N/A";
+        document.getElementById('ipv4').textContent = data.ip;
+        document.getElementById('isp').textContent = data.org;
+      });
+    
+    // IPv6 fallback
+    fetch('https://api64.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('ipv6').textContent = data.ip;
       });
 
-    // 系统参数
-    document.getElementById("useragent").textContent = navigator.userAgent;
-    document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
-    document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
-    document.getElementById("os").textContent = navigator.platform;
-    document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
-    document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
-    document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
-    document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
-    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
-    document.getElementById("gpu").textContent = "Detectando...";
+    // FingerprintJS
+    FingerprintJS.load()
+      .then(fp => fp.get())
+      .then(result => {
+        document.getElementById('fingerprint').textContent = result.visitorId;
+      });
 
-    // GPU
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (gl) {
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "N/A";
-      document.getElementById("gpu").textContent = vendor;
-    } else {
-      document.getElementById("gpu").textContent = "Não detectado";
+    // Software & Hardware
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+    const memory = navigator.deviceMemory || 'N/A';
+    const gpu = navigator?.gpu?.adapter || 'Detectando...';
+    const width = screen.width;
+    const height = screen.height;
+    const ratio = (width / height).toFixed(2);
+    const orientation = screen.orientation?.type || 'N/A';
+
+    document.getElementById('ua').textContent = ua;
+    document.getElementById('os').textContent = platform;
+    document.getElementById('device').textContent = navigator.platform.includes("Win") ? "Desktop" : "Mobile";
+    document.getElementById('browser').textContent = navigator.userAgentData?.brands?.[0]?.brand || 'Detectando...';
+    document.getElementById('engine').textContent = navigator.product;
+
+    document.getElementById('gpu').textContent = getGPUInfo();
+    document.getElementById('ram').textContent = memory + ' GB';
+    document.getElementById('res').textContent = `${width} x ${height}`;
+    document.getElementById('ratio').textContent = ratio;
+    document.getElementById('orientation').textContent = orientation;
+
+    function getGPUInfo() {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      } catch (e) {
+        return 'Não detectado';
+      }
     }
   </script>
 </body>
