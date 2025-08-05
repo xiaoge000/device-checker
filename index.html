@@ -1,43 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diagnóstico do Dispositivo</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f4f4f9;
-      color: #333;
       margin: 0;
-      padding: 40px;
+      padding: 16px;
+      color: #333;
     }
     h1 {
       color: #2a7ae2;
       text-align: center;
+      font-size: 22px;
+      margin-bottom: 20px;
     }
     .card {
-      background-color: #fff;
+      background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 20px 30px;
-      margin: 20px auto;
-      max-width: 800px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
     .section-title {
-      font-size: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2a7ae2;
       margin-bottom: 12px;
-      color: #444;
-      border-bottom: 2px solid #2a7ae2;
-      padding-bottom: 5px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
     }
     .info-row {
       display: flex;
       justify-content: space-between;
-      margin: 8px 0;
+      flex-wrap: wrap;
+      margin: 6px 0;
+      font-size: 15px;
     }
-    .info-row span {
-      font-weight: 500;
+    .info-row span:first-child {
+      font-weight: 600;
+      color: #555;
+      flex: 1 1 40%;
+    }
+    .info-row span:last-child {
+      flex: 1 1 60%;
+      text-align: right;
+      word-break: break-word;
+    }
+    @media (max-width: 500px) {
+      .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .info-row span:last-child {
+        text-align: left;
+        margin-top: 2px;
+      }
     }
   </style>
 </head>
@@ -70,73 +94,72 @@
     <div class="info-row"><span>Resolução da Tela:</span><span id="resolution"></span></div>
     <div class="info-row"><span>Proporção:</span><span id="aspect"></span></div>
     <div class="info-row"><span>Orientação:</span><span id="orientation"></span></div>
-    <div class="info-row"><span>Device ID:</span><span id="deviceId">Detectando...</span></div> <!-- ✅ 新增 -->
+    <div class="info-row"><span>Device ID:</span><span id="deviceId">Detectando...</span></div>
   </div>
 
   <script>
-  // ✅ 设备信息
-  document.getElementById("useragent").textContent = navigator.userAgent;
-  document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
-  document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
-  document.getElementById("os").textContent = navigator.platform;
-  document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
-  document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
-  document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
-  document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
-  document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+    // ✅ 设备信息
+    document.getElementById("useragent").textContent = navigator.userAgent;
+    document.getElementById("browser").textContent = navigator.userAgent.match(/Chrome\/([0-9.]+)/)?.[0] || "Desconhecido";
+    document.getElementById("engine").textContent = navigator.productSub || "Desconhecido";
+    document.getElementById("os").textContent = navigator.platform;
+    document.getElementById("device").textContent = navigator.platform.includes("Win") ? "Windows" : "Outro";
+    document.getElementById("resolution").textContent = `${screen.width} x ${screen.height}`;
+    document.getElementById("aspect").textContent = (screen.width / screen.height).toFixed(2);
+    document.getElementById("orientation").textContent = screen.width > screen.height ? "Paisagem" : "Retrato";
+    document.getElementById("ram").textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
 
-  // ✅ GPU
-  try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (gl) {
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      document.getElementById("gpu").textContent = vendor || "Detectado";
-    } else {
-      document.getElementById("gpu").textContent = "Não detectado";
+    // ✅ GPU
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        const vendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        document.getElementById("gpu").textContent = vendor || "Detectado";
+      } else {
+        document.getElementById("gpu").textContent = "Não detectado";
+      }
+    } catch (e) {
+      document.getElementById("gpu").textContent = "Erro ao detectar";
     }
-  } catch (e) {
-    document.getElementById("gpu").textContent = "Erro ao detectar";
-  }
 
-  // ✅ 获取 IPv4
-  fetch("https://api.ipify.org?format=json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("ipv4").textContent = data.ip || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("ipv4").textContent = "Erro";
-    });
+    // ✅ 获取 IPv4
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("ipv4").textContent = data.ip || "N/A";
+      })
+      .catch(() => {
+        document.getElementById("ipv4").textContent = "Erro";
+      });
 
-  // ✅ 获取 IPv6
-  fetch("https://api64.ipify.org?format=json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("ipv6").textContent = data.ip || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("ipv6").textContent = "Não disponível";
-    });
+    // ✅ 获取 IPv6
+    fetch("https://api64.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("ipv6").textContent = data.ip || "N/A";
+      })
+      .catch(() => {
+        document.getElementById("ipv6").textContent = "Não disponível";
+      });
 
-  // ✅ DNS 组织名称（ISP）
-  fetch("https://ipapi.co/json")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("dns").textContent = data.org || "N/A";
-    })
-    .catch(() => {
-      document.getElementById("dns").textContent = "Erro";
-    });
+    // ✅ DNS 组织名称（ISP）
+    fetch("https://ipapi.co/json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("dns").textContent = data.org || "N/A";
+      })
+      .catch(() => {
+        document.getElementById("dns").textContent = "Erro";
+      });
 
-  // ✅ 设备 ID（FingerprintJS）
-  (async () => {
-    const fp = await import('https://openfpcdn.io/fingerprintjs/v3')
-      .then(FingerprintJS => FingerprintJS.load());
-    const result = await fp.get();
-    document.getElementById("deviceId").textContent = result.visitorId;
-  })();
-</script>
+    // ✅ 设备 ID（FingerprintJS）
+    (async () => {
+      const fp = await import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load());
+      const result = await fp.get();
+      document.getElementById("deviceId").textContent = result.visitorId;
+    })();
+  </script>
 </body>
 </html>
